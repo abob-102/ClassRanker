@@ -296,4 +296,8 @@ vcruntime140_1.dll
 
 ## License
 
-请根据实际项目要求补充许可证，例如 MIT、Apache-2.0 或内部使用说明。
+This project is licensed under the MIT License.
+
+Third-party dependencies:
+- Qt 6: LGPLv3/GPLv3/commercial license, used through dynamic linking.
+- OpenXLSX: BSD 3-Clause License.
