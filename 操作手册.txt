@@ -1,0 +1,202 @@
+ClassRanker 班级成绩、绩点与综测排名程序操作手册
+====================================================
+
+一、发布包内文件
+----------------
+
+1. ClassRanker.exe
+   Qt 图形界面程序，普通用户双击运行。
+
+2. ClassRankerCLI.exe
+   后台计算程序，必须与 ClassRanker.exe 放在同一目录，不要删除或改名。
+
+3. class_data_template.xlsx
+   示例输入表格。程序默认读取此文件，可用于测试和改表头格式。
+
+4. ranking_results.xlsx
+   默认输出结果文件。重新计算前请先关闭 Excel 中打开的结果文件。
+
+5. formulas.ini、ui_settings.ini
+   公式和界面配置文件。图形界面会自动保存当前使用的路径、公式、字体和主题。
+
+6. platforms、styles、*.dll
+   Qt 运行库文件。跨电脑使用时必须随 ClassRanker.exe 一起保留。
+
+二、快速使用
+------------
+
+1. 解压发布包。
+2. 双击 ClassRanker.exe。
+3. 在“排名计算”页选择输入 Excel 文件和输出结果路径。
+4. 点击“开始计算”。
+5. 计算完成后点击“打开结果”查看排名表。
+6. 如需新建示例输入表格，点击“生成示例表格”。
+
+三、Excel 输入格式
+------------------
+
+Excel 文件需要包含以下工作表：
+
+1. Students
+   表头：student_id, name
+   含义：学号、姓名
+
+2. Courses
+   表头：student_id, course, score, credit, grade_point
+   含义：学号、课程名称、成绩、学分、课程绩点
+   grade_point 可以填写，也可以留空。默认公式会按 score 自动换算绩点。
+
+3. Bonuses
+   表头：student_id, item, points
+   含义：学号、加分项目、加分值
+   此表可为空，但建议保留表头。
+
+四、在界面中修改公式
+--------------------
+
+打开“公式与界面”页，可直接修改四类公式：
+
+1. 课程绩点公式
+   对每一门课程执行，可用变量：score、credit、grade_point。
+
+2. 成绩排名公式
+   默认：weighted_score
+
+3. 绩点排名公式
+   默认：weighted_gpa
+
+4. 综测排名公式
+   默认：weighted_score*0.8+bonus_total
+
+修改后回到“排名计算”页点击“开始计算”。点击“恢复默认公式”可恢复程序内置公式。
+
+五、默认绩点规则
+----------------
+
+90-100   = 4.0
+85-89.5  = 3.7
+82-84.5  = 3.3
+78-81.5  = 3.0
+75-77.5  = 2.7
+72-74.5  = 2.3
+68-71.5  = 2.0
+64-67.5  = 1.5
+60-63.5  = 1.0
+60 以下  = 0
+
+默认课程绩点公式：
+if(score>=90,4.0,if(score>=85,3.7,if(score>=82,3.3,if(score>=78,3.0,if(score>=75,2.7,if(score>=72,2.3,if(score>=68,2.0,if(score>=64,1.5,if(score>=60,1.0,0)))))))))
+
+六、平均绩点与加权成绩
+----------------------
+
+平均绩点 GPA = Σ(课程绩点 × 课程学分) / Σ课程学分
+
+加权平均分 WAN = Σ(课程分数 × 课程学分) / Σ课程学分
+
+程序中 weighted_gpa 对应 GPA，weighted_score 对应 WAN。
+
+七、排名公式可用变量
+--------------------
+
+weighted_score  加权平均分
+average_score   算术平均分
+weighted_gpa    加权平均绩点
+average_gpa     算术平均绩点
+total_credits   总学分
+course_count    课程数量
+bonus_total     综测加分合计
+
+示例：
+
+1. 成绩占 80%，综测加分直接相加：
+   weighted_score*0.8+bonus_total
+
+2. 成绩占 70%，绩点折算为 30 分，再加综测加分：
+   weighted_score*0.7+weighted_gpa/4.0*30+bonus_total
+
+3. 综测总分最高不超过 100：
+   min(100,weighted_score*0.8+bonus_total)
+
+八、公式支持的运算和函数
+------------------------
+
+运算符：
++  -  *  /  %  ^
+>  >=  <  <=  ==  !=
+&&  ||  !
+
+函数：
+if(条件, 成立值, 不成立值)
+min(数值, 数值, ...)
+max(数值, 数值, ...)
+abs(数值)
+sqrt(数值)
+round(数值) 或 round(数值, 小数位数)
+floor(数值)
+ceil(数值)
+pow(底数, 指数)
+clamp(数值, 下限, 上限)
+
+变量和函数名必须使用英文。
+
+九、在代码中修改默认公式
+------------------------
+
+Qt 图形界面默认公式位置：
+src/qt_gui.cpp
+
+搜索：
+DefaultCourseFormula
+DefaultScoreFormula
+DefaultGpaFormula
+DefaultComprehensiveFormula
+
+后台程序默认公式位置：
+src/main.cpp
+
+搜索：
+struct FormulaConfig
+
+修改后运行 build_full.cmd 重新编译。Qt 版需要本机已安装 Qt，或用 CMake 参数指定 Qt6_DIR。
+
+十、自定义界面
+--------------
+
+在“公式与界面”页可以设置：
+
+1. 字体：小、标准、大。
+2. 主题：浅灰、柔和蓝、柔和绿。
+3. 公式输入框支持横向滚动，长公式不会挤压界面。
+4. “绩点说明”页使用 Qt 表格和滚动布局，窗口缩放时不会出现文字重合。
+5. 背景文件：支持 png、jpg、jpeg、bmp、gif。
+6. GIF 背景会自动播放。
+7. 背景显示模式：填充、适应、居中、平铺。
+8. 背景透明度可调。建议不要调得太高，否则会影响文字阅读。
+9. 文字框透明度可调。调低后，输入框、公式框、状态框和表格会透出更多背景。
+
+界面源码位置：
+src/qt_gui.cpp
+
+可修改内容：
+窗口标题、按钮文字、主题颜色、默认窗口大小、绩点说明表格、背景显示逻辑。
+
+背景文件路径会保存到 ui_settings.ini。跨电脑使用时，如果想保留自定义背景，请把背景图片或 GIF 一起带到新电脑，并在程序中重新选择一次背景文件。
+
+十一、常见错误
+--------------
+
+1. 找不到 ClassRankerCLI.exe
+   请确认 ClassRankerCLI.exe 与 ClassRanker.exe 在同一目录。
+
+2. 写入 xlsx 失败
+   请关闭 Excel 中正在打开的输出文件，再重新计算。
+
+3. 找不到 Students 或 Courses 工作表
+   请检查输入 Excel 是否包含 Students、Courses、Bonuses 工作表，工作表名称不要多空格。
+
+4. grade_point 没有有效数据
+   如果 Courses 表的 grade_point 为空，不要把课程绩点公式只写成 grade_point。请使用默认的 score 分段公式。
+
+5. 结果和学校规则不一致
+   请先确认绩点分段、成绩权重、综测加分方式和并列排名规则，再修改公式。

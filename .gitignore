@@ -1,0 +1,69 @@
+# Build directories
+build/
+build-*/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+
+# Visual Studio / MSBuild
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.user
+*.suo
+*.opensdf
+*.sdf
+*.ipch
+x64/
+x86/
+Debug/
+Release/
+
+# Compiled binaries and libraries
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.exp
+
+# Release packages and deployed runtime folders
+dist/
+dist-qt/
+*.zip
+
+# Generated / test result spreadsheets
+ranking_results.xlsx
+gui-e2e-results.xlsx
+test-results.xlsx
+xlsx-roundtrip-results.xlsx
+xlsx-overwrite-test.xlsx
+template-overwrite-test.xlsx
+
+# Screenshots generated during UI checks
+gui-check*.png
+gui-guide-check.png
+gui-v2-*.png
+
+# Local runtime settings
+ui_settings.ini
+dist*/ui_settings.ini
+!config/ui_settings.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+~$*
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
